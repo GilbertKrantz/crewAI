@@ -621,3 +621,97 @@ class OpenAICompletion(BaseLLM):
                 formatted_messages.append(message)
 
         return formatted_messages
+
+    def responses(
+        self,
+        input: str | dict[str, Any],
+        instructions: str | None = None,
+        max_output_tokens: int | None = None,
+        text: dict[str, Any] | None = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        stream: bool | None = None,
+        metadata: dict[str, Any] | None = None,
+        previous_response_id: str | None = None,
+        reasoning: dict[str, Any] | None = None,
+        store: bool | None = None,
+        background: bool | None = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Call OpenAI Responses API directly using the native SDK.
+
+        The Responses API is a separate endpoint from chat/completions that provides
+        a stateful conversation interface with built-in tool support. Statefulness is
+        maintained through the `previous_response_id` parameter, which links responses
+        together to form multi-turn conversations.
+
+        Example:
+            >>> # First turn
+            >>> response1 = llm.responses(input="What is 2+2?")
+            >>> # Second turn - maintains conversation state
+            >>> response2 = llm.responses(
+            ...     input="What about 3+3?",
+            ...     previous_response_id=response1["id"]
+            ... )
+
+        Args:
+            input: Text, image, or file inputs to the model
+            instructions: System instructions (replaces system messages)
+            max_output_tokens: Maximum tokens in the response
+            text: Configuration for text output format
+            tools: Tools the model can call
+            tool_choice: How the model should select tools
+            temperature: Sampling temperature (0-2)
+            top_p: Nucleus sampling parameter
+            stream: Whether to stream the response
+            metadata: Additional metadata for the request
+            previous_response_id: ID of previous response for multi-turn conversations
+            reasoning: Configuration for reasoning models
+            store: Whether to store the response
+            background: Whether to run in background
+            **kwargs: Additional parameters
+
+        Returns:
+            Response object from the Responses API
+        """
+        # Prepare parameters
+        params: dict[str, Any] = {
+            "model": self.model,
+            "input": input,
+        }
+
+        # Add optional parameters
+        if instructions is not None:
+            params["instructions"] = instructions
+        if max_output_tokens is not None:
+            params["max_output_tokens"] = max_output_tokens
+        if text is not None:
+            params["text"] = text
+        if tools is not None:
+            params["tools"] = tools
+        if tool_choice is not None:
+            params["tool_choice"] = tool_choice
+        if temperature is not None:
+            params["temperature"] = temperature
+        if top_p is not None:
+            params["top_p"] = top_p
+        if stream is not None:
+            params["stream"] = stream
+        if metadata is not None:
+            params["metadata"] = metadata
+        if previous_response_id is not None:
+            params["previous_response_id"] = previous_response_id
+        if reasoning is not None:
+            params["reasoning"] = reasoning
+        if store is not None:
+            params["store"] = store
+        if background is not None:
+            params["background"] = background
+
+        # Merge additional params
+        params.update(kwargs)
+
+        # Call OpenAI Responses API
+        return self.client.responses.create(**params)
