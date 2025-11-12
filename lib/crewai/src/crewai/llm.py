@@ -518,6 +518,9 @@ class LLM(BaseLLM):
         reasoning_effort: Literal["none", "low", "medium", "high"] | None = None,
         stream: bool = False,
         interceptor: BaseInterceptor[httpx.Request, httpx.Response] | None = None,
+        modalities: list[str] | None = None,
+        audio: dict[str, Any] | None = None,
+        prediction: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize LLM instance.
@@ -554,6 +557,9 @@ class LLM(BaseLLM):
         self.callbacks = callbacks
         self.context_window_size = 0
         self.reasoning_effort = reasoning_effort
+        self.modalities = modalities
+        self.audio = audio
+        self.prediction = prediction
         self.additional_params = kwargs
         self.is_anthropic = self._is_anthropic_model(model)
         self.stream = stream
@@ -628,6 +634,9 @@ class LLM(BaseLLM):
             "stream": self.stream,
             "tools": tools,
             "reasoning_effort": self.reasoning_effort,
+            "modalities": self.modalities,
+            "audio": self.audio,
+            "prediction": self.prediction,
             **self.additional_params,
         }
 
@@ -1619,6 +1628,9 @@ class LLM(BaseLLM):
                 "reasoning_effort",
                 "stream",
                 "stop",
+                "modalities",
+                "audio",
+                "prediction",
             ]
         }
 
@@ -1646,6 +1658,9 @@ class LLM(BaseLLM):
             reasoning_effort=self.reasoning_effort,
             stream=self.stream,
             stop=self.stop,
+            modalities=self.modalities,
+            audio=self.audio,
+            prediction=self.prediction,
             **filtered_params,
         )
 
@@ -1681,6 +1696,9 @@ class LLM(BaseLLM):
                 "reasoning_effort",
                 "stream",
                 "stop",
+                "modalities",
+                "audio",
+                "prediction",
             ]
         }
 
@@ -1712,5 +1730,8 @@ class LLM(BaseLLM):
             reasoning_effort=self.reasoning_effort,
             stream=self.stream,
             stop=copy.deepcopy(self.stop, memo) if self.stop else None,
+            modalities=copy.deepcopy(self.modalities, memo) if self.modalities else None,
+            audio=copy.deepcopy(self.audio, memo) if self.audio else None,
+            prediction=copy.deepcopy(self.prediction, memo) if self.prediction else None,
             **filtered_params,
         )

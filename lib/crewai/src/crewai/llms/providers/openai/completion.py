@@ -63,6 +63,9 @@ class OpenAICompletion(BaseLLM):
         reasoning_effort: str | None = None,
         provider: str | None = None,
         interceptor: BaseInterceptor[httpx.Request, httpx.Response] | None = None,
+        modalities: list[str] | None = None,
+        audio: dict[str, Any] | None = None,
+        prediction: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         """Initialize OpenAI chat completion client."""
@@ -112,6 +115,9 @@ class OpenAICompletion(BaseLLM):
         self.logprobs = logprobs
         self.top_logprobs = top_logprobs
         self.reasoning_effort = reasoning_effort
+        self.modalities = modalities
+        self.audio = audio
+        self.prediction = prediction
         self.is_o1_model = "o1" in model.lower()
         self.is_gpt4_model = "gpt-4" in model.lower()
 
@@ -244,6 +250,14 @@ class OpenAICompletion(BaseLLM):
         # Handle o1 model specific parameters
         if self.is_o1_model and self.reasoning_effort:
             params["reasoning_effort"] = self.reasoning_effort
+
+        # Handle OpenAI Responses API parameters
+        if self.modalities is not None:
+            params["modalities"] = self.modalities
+        if self.audio is not None:
+            params["audio"] = self.audio
+        if self.prediction is not None:
+            params["prediction"] = self.prediction
 
         if tools:
             params["tools"] = self._convert_tools_for_interference(tools)
