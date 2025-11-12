@@ -643,7 +643,18 @@ class OpenAICompletion(BaseLLM):
         """Call OpenAI Responses API directly using the native SDK.
 
         The Responses API is a separate endpoint from chat/completions that provides
-        a stateful conversation interface with built-in tool support.
+        a stateful conversation interface with built-in tool support. Statefulness is
+        maintained through the `previous_response_id` parameter, which links responses
+        together to form multi-turn conversations.
+
+        Example:
+            >>> # First turn
+            >>> response1 = llm.responses(input="What is 2+2?")
+            >>> # Second turn - maintains conversation state
+            >>> response2 = llm.responses(
+            ...     input="What about 3+3?",
+            ...     previous_response_id=response1["id"]
+            ... )
 
         Args:
             input: Text, image, or file inputs to the model

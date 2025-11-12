@@ -29,7 +29,7 @@ class TestResponsesAPISupport:
         with patch("litellm.responses") as mock_responses:
             mock_responses.return_value = {"id": "resp_123", "status": "completed"}
 
-            result = llm.responses(input="Hello, world!")
+            llm.responses(input="Hello, world!")
 
             # Verify litellm.responses was called
             assert mock_responses.called
@@ -46,7 +46,7 @@ class TestResponsesAPISupport:
         with patch("litellm.aresponses") as mock_aresponses:
             mock_aresponses.return_value = {"id": "resp_123", "status": "completed"}
 
-            result = await llm.aresponses(input="Hello, world!")
+            await llm.aresponses(input="Hello, world!")
 
             # Verify litellm.aresponses was called
             assert mock_aresponses.called
@@ -62,7 +62,7 @@ class TestResponsesAPISupport:
         with patch("litellm.responses") as mock_responses:
             mock_responses.return_value = {"id": "resp_123", "status": "completed"}
 
-            result = llm.responses(
+            llm.responses(
                 input="Hello",
                 instructions="Be helpful",
                 max_output_tokens=100,
@@ -96,7 +96,7 @@ class TestResponsesAPISupport:
         with patch.object(llm.client.responses, "create") as mock_create:
             mock_create.return_value = {"id": "resp_123", "status": "completed"}
 
-            result = llm.responses(input="Hello, world!")
+            llm.responses(input="Hello, world!")
 
             # Verify OpenAI SDK was called
             assert mock_create.called
@@ -114,7 +114,7 @@ class TestResponsesAPISupport:
         with patch.object(llm.client.responses, "create") as mock_create:
             mock_create.return_value = {"id": "resp_123", "status": "completed"}
 
-            result = llm.responses(
+            llm.responses(
                 input="Test",
                 instructions="System prompt",
                 max_output_tokens=50,

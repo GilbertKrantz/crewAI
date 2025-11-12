@@ -1363,6 +1363,94 @@ class LLM(BaseLLM):
                 )
                 raise
 
+    def _prepare_responses_params(
+        self,
+        input: str | dict[str, Any],
+        instructions: str | None = None,
+        max_output_tokens: int | None = None,
+        text: dict[str, Any] | None = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        stream: bool | None = None,
+        metadata: dict[str, Any] | None = None,
+        previous_response_id: str | None = None,
+        reasoning: dict[str, Any] | None = None,
+        store: bool | None = None,
+        background: bool | None = None,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        """Prepare parameters for Responses API calls.
+
+        Args:
+            input: Text, image, or file inputs to the model
+            instructions: System instructions (replaces system messages)
+            max_output_tokens: Maximum tokens in the response
+            text: Configuration for text output format
+            tools: Tools the model can call
+            tool_choice: How the model should select tools
+            temperature: Sampling temperature (0-2)
+            top_p: Nucleus sampling parameter
+            stream: Whether to stream the response
+            metadata: Additional metadata for the request
+            previous_response_id: ID of previous response for multi-turn conversations
+            reasoning: Configuration for reasoning models
+            store: Whether to store the response
+            background: Whether to run in background
+            **kwargs: Additional parameters
+
+        Returns:
+            Dictionary of parameters for the Responses API call
+        """
+        params: dict[str, Any] = {
+            "model": self.model,
+            "input": input,
+        }
+
+        # Add optional parameters if provided
+        if instructions is not None:
+            params["instructions"] = instructions
+        if max_output_tokens is not None:
+            params["max_output_tokens"] = max_output_tokens
+        if text is not None:
+            params["text"] = text
+        if tools is not None:
+            params["tools"] = tools
+        if tool_choice is not None:
+            params["tool_choice"] = tool_choice
+        if temperature is not None:
+            params["temperature"] = temperature
+        if top_p is not None:
+            params["top_p"] = top_p
+        if stream is not None:
+            params["stream"] = stream
+        if metadata is not None:
+            params["metadata"] = metadata
+        if previous_response_id is not None:
+            params["previous_response_id"] = previous_response_id
+        if reasoning is not None:
+            params["reasoning"] = reasoning
+        if store is not None:
+            params["store"] = store
+        if background is not None:
+            params["background"] = background
+
+        # Add API configuration
+        if self.api_key is not None:
+            params["api_key"] = self.api_key
+        if self.base_url is not None:
+            params["base_url"] = self.base_url
+        if self.api_version is not None:
+            params["api_version"] = self.api_version
+        if self.timeout is not None:
+            params["timeout"] = self.timeout
+
+        # Merge additional params
+        params.update(kwargs)
+
+        return params
+
     def responses(
         self,
         input: str | dict[str, Any],
@@ -1416,52 +1504,23 @@ class LLM(BaseLLM):
                 "Install it with: pip install litellm"
             )
 
-        # Prepare parameters for litellm.responses()
-        params: dict[str, Any] = {
-            "model": self.model,
-            "input": input,
-        }
-
-        # Add optional parameters if provided
-        if instructions is not None:
-            params["instructions"] = instructions
-        if max_output_tokens is not None:
-            params["max_output_tokens"] = max_output_tokens
-        if text is not None:
-            params["text"] = text
-        if tools is not None:
-            params["tools"] = tools
-        if tool_choice is not None:
-            params["tool_choice"] = tool_choice
-        if temperature is not None:
-            params["temperature"] = temperature
-        if top_p is not None:
-            params["top_p"] = top_p
-        if stream is not None:
-            params["stream"] = stream
-        if metadata is not None:
-            params["metadata"] = metadata
-        if previous_response_id is not None:
-            params["previous_response_id"] = previous_response_id
-        if reasoning is not None:
-            params["reasoning"] = reasoning
-        if store is not None:
-            params["store"] = store
-        if background is not None:
-            params["background"] = background
-
-        # Add API configuration
-        if self.api_key is not None:
-            params["api_key"] = self.api_key
-        if self.base_url is not None:
-            params["base_url"] = self.base_url
-        if self.api_version is not None:
-            params["api_version"] = self.api_version
-        if self.timeout is not None:
-            params["timeout"] = self.timeout
-
-        # Merge additional params
-        params.update(kwargs)
+        params = self._prepare_responses_params(
+            input=input,
+            instructions=instructions,
+            max_output_tokens=max_output_tokens,
+            text=text,
+            tools=tools,
+            tool_choice=tool_choice,
+            temperature=temperature,
+            top_p=top_p,
+            stream=stream,
+            metadata=metadata,
+            previous_response_id=previous_response_id,
+            reasoning=reasoning,
+            store=store,
+            background=background,
+            **kwargs,
+        )
 
         # Call litellm.responses()
         return litellm.responses(**params)
@@ -1518,52 +1577,23 @@ class LLM(BaseLLM):
                 "Install it with: pip install litellm"
             )
 
-        # Prepare parameters for litellm.aresponses()
-        params: dict[str, Any] = {
-            "model": self.model,
-            "input": input,
-        }
-
-        # Add optional parameters if provided
-        if instructions is not None:
-            params["instructions"] = instructions
-        if max_output_tokens is not None:
-            params["max_output_tokens"] = max_output_tokens
-        if text is not None:
-            params["text"] = text
-        if tools is not None:
-            params["tools"] = tools
-        if tool_choice is not None:
-            params["tool_choice"] = tool_choice
-        if temperature is not None:
-            params["temperature"] = temperature
-        if top_p is not None:
-            params["top_p"] = top_p
-        if stream is not None:
-            params["stream"] = stream
-        if metadata is not None:
-            params["metadata"] = metadata
-        if previous_response_id is not None:
-            params["previous_response_id"] = previous_response_id
-        if reasoning is not None:
-            params["reasoning"] = reasoning
-        if store is not None:
-            params["store"] = store
-        if background is not None:
-            params["background"] = background
-
-        # Add API configuration
-        if self.api_key is not None:
-            params["api_key"] = self.api_key
-        if self.base_url is not None:
-            params["base_url"] = self.base_url
-        if self.api_version is not None:
-            params["api_version"] = self.api_version
-        if self.timeout is not None:
-            params["timeout"] = self.timeout
-
-        # Merge additional params
-        params.update(kwargs)
+        params = self._prepare_responses_params(
+            input=input,
+            instructions=instructions,
+            max_output_tokens=max_output_tokens,
+            text=text,
+            tools=tools,
+            tool_choice=tool_choice,
+            temperature=temperature,
+            top_p=top_p,
+            stream=stream,
+            metadata=metadata,
+            previous_response_id=previous_response_id,
+            reasoning=reasoning,
+            store=store,
+            background=background,
+            **kwargs,
+        )
 
         # Call litellm.aresponses()
         return await litellm.aresponses(**params)
