@@ -340,3 +340,74 @@ class TestResponsesAPISupport:
         # Verify deep copy creates new objects
         assert llm_deepcopy.audio is not llm.audio
         assert llm_deepcopy.prediction is not llm.prediction
+
+    def test_llm_responses_api_method_exists(self) -> None:
+        """Test that LLM class has responses() method."""
+        llm = LLM(model="gpt-4o", is_litellm=True)
+        assert hasattr(llm, "responses")
+        assert callable(llm.responses)
+
+    def test_llm_aresponses_api_method_exists(self) -> None:
+        """Test that LLM class has aresponses() method."""
+        llm = LLM(model="gpt-4o", is_litellm=True)
+        assert hasattr(llm, "aresponses")
+        assert callable(llm.aresponses)
+
+    def test_llm_responses_api_calls_litellm(self) -> None:
+        """Test that responses() method calls litellm.responses."""
+        llm = LLM(model="gpt-4o", is_litellm=True)
+
+        with patch("litellm.responses") as mock_responses:
+            mock_responses.return_value = {"id": "resp_123", "status": "completed"}
+
+            result = llm.responses(input="Hello, world!")
+
+            # Verify litellm.responses was called
+            assert mock_responses.called
+            call_args = mock_responses.call_args
+            assert call_args is not None
+            assert call_args.kwargs["model"] == "gpt-4o"
+            assert call_args.kwargs["input"] == "Hello, world!"
+
+    @pytest.mark.asyncio
+    async def test_llm_aresponses_api_calls_litellm(self) -> None:
+        """Test that aresponses() method calls litellm.aresponses."""
+        llm = LLM(model="gpt-4o", is_litellm=True)
+
+        with patch("litellm.aresponses") as mock_aresponses:
+            mock_aresponses.return_value = {"id": "resp_123", "status": "completed"}
+
+            result = await llm.aresponses(input="Hello, world!")
+
+            # Verify litellm.aresponses was called
+            assert mock_aresponses.called
+            call_args = mock_aresponses.call_args
+            assert call_args is not None
+            assert call_args.kwargs["model"] == "gpt-4o"
+            assert call_args.kwargs["input"] == "Hello, world!"
+
+    def test_openai_native_responses_api_method_exists(self) -> None:
+        """Test that OpenAI native provider has responses() method."""
+        from crewai.llms.providers.openai.completion import OpenAICompletion
+
+        llm = OpenAICompletion(model="gpt-4o", api_key="test-key")
+        assert hasattr(llm, "responses")
+        assert callable(llm.responses)
+
+    def test_openai_native_responses_api_calls_sdk(self) -> None:
+        """Test that OpenAI native provider responses() calls SDK."""
+        from crewai.llms.providers.openai.completion import OpenAICompletion
+
+        llm = OpenAICompletion(model="gpt-4o", api_key="test-key")
+
+        with patch.object(llm.client.responses, "create") as mock_create:
+            mock_create.return_value = {"id": "resp_123", "status": "completed"}
+
+            result = llm.responses(input="Hello, world!")
+
+            # Verify OpenAI SDK was called
+            assert mock_create.called
+            call_args = mock_create.call_args
+            assert call_args is not None
+            assert call_args.kwargs["model"] == "gpt-4o"
+            assert call_args.kwargs["input"] == "Hello, world!"
